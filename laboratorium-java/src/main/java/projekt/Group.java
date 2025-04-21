@@ -21,10 +21,11 @@ public class Group {
 		this.specialization = specialization;
 		this.description = description;
 	}
+
 	public void addStudent(Student s) {
-	    if (!students.contains(s)) {
-	    	students.add(s);
-	    }
+		if (!students.contains(s)) {
+			students.add(s);
+		}
 	}
 
 	////////////////////////////

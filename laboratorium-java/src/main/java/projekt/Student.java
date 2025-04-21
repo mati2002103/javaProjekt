@@ -3,7 +3,7 @@ package projekt;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Student  {
+public class Student {
 	// Imie studenta
 	private String name;
 	// Nazwisko studenta
@@ -24,7 +24,7 @@ public class Student  {
 	}
 
 	// Konstruktor parametryczny tworzacy studenta
-	Student(String name, String surname, String albumNumber, Group group, Map<Subject, Map<String, Integer>> grades) {
+	Student(String name, String surname, String albumNumber, Group group) {
 		this.name = name;
 		this.surname = surname;
 		this.albumNumber = albumNumber;
@@ -32,15 +32,12 @@ public class Student  {
 	}
 
 	public Student createStudent(String name, String surname, String albumNumber, Group group) {
-		return null;
+		Student newStudent = new Student(name, surname, albumNumber, group);
+		return newStudent;
 	}
 
 	public String studentToString() {
 		return null;
-	}
-
-	public void assignStudentGroup(Group group) {
-		this.group = group;
 	}
 
 	public boolean addPoints(Subject subject, Criteria criteria, int points) throws RegisterException {

@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>pl.wit.jj</groupId>
-	<artifactId>laboratorium-java</artifactId>
+	<artifactId>projekt</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
-	<name>laboratorium-java</name>
+	<name>projekt</name>
 	<!-- FIXME change it to the project's website -->
 	<url>http://www.example.com</url>
 
