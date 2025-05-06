@@ -1,5 +1,8 @@
 package projekt;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,4 +83,50 @@ public class SubjectDB {
 		}
 		return false;
 	}
+	
+	/**
+	 * Zapisuje listę przedmiotów do strumienia w formacie binarnym.
+	 * 
+	 * @param out 			strumień wyjściowy DataOutputStream z zapisanymi danymi przedmiotów
+	 * @throws IOException  błąd zapisu
+	 */
+	
+	public void saveToFile(DataOutputStream out) throws IOException {
+        out.writeInt(subjectList.size());
+        for (Subject s : subjectList) {
+            out.writeUTF(s.getSubjectName());
+
+            Map<Criteria, Integer> criteriaMap = s.getGradingCriteria();
+            out.writeInt(criteriaMap.size());
+            for (Map.Entry<Criteria, Integer> entry : criteriaMap.entrySet()) {
+                out.writeUTF(entry.getKey().name());
+                out.writeInt(entry.getValue());
+            }
+        }
+    }
+	
+	/**
+	 * Wczytuje listę przedmiotów ze strumienia w formacie binarnym.
+	 * 
+	 * @param in			strumień wejściowy DataInputStream
+	 * @throws IOException  błąd odczytu
+	 */
+
+    public void loadFromFile(DataInputStream in) throws IOException {
+        int subjectCount = in.readInt();
+        for (int i = 0; i < subjectCount; i++) {
+            String name = in.readUTF();
+            Subject subj = new Subject(name);
+
+            int criteriaCount = in.readInt();
+            for (int j = 0; j < criteriaCount; j++) {
+                String criteriaName = in.readUTF();
+                int maxPoints = in.readInt();
+                subj.updateCriterion(Criteria.valueOf(criteriaName), maxPoints);
+            }
+
+            subjectList.add(subj);
+        }
+    }
+	
 }
