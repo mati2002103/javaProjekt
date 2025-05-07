@@ -1,5 +1,8 @@
 package projekt;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,4 +82,56 @@ public class GroupDB {
 		}
 		return false;
 	}
+	
+	/**
+	 * Zapisuje listę group do strumienia w formacie binarnym.
+	 * 
+	 * @param out 			strumień wyjściowy DataOutputStream z zapisanymi danymi grup
+	 * @throws IOException	błąd zapisu
+	 */
+	
+	public void saveToFile(DataOutputStream out) throws IOException {
+        out.writeInt(groupList.size());
+        for (Group g : groupList) {
+            out.writeUTF(g.getGroupCode());
+            out.writeUTF(g.getSpecialization());
+            out.writeUTF(g.getDescription());
+
+            out.writeInt(g.getStudents().size());
+            for (Student s : g.getStudents()) {
+                out.writeUTF(s.getName());
+                out.writeUTF(s.getSurname());
+                out.writeUTF(s.getAlbumNumber());
+            }
+        }
+    }
+
+	/**
+	 * Wczytuje liste grup z podanego strumienia wejściowego w formacie binarnym.
+	 * 
+	 * @param in  			strumień wejściowy DataInputStream
+	 * @throws IOException  błąd odczytu
+	 */
+	
+    public void loadFromFile(DataInputStream in) throws IOException {
+        int groupCount = in.readInt();
+        for (int i = 0; i < groupCount; i++) {
+            String code = in.readUTF();
+            String specialization = in.readUTF();
+            String description = in.readUTF();
+
+            Group g = new Group(code, specialization, description);
+
+            int studentCount = in.readInt();
+            for (int j = 0; j < studentCount; j++) {
+                String name = in.readUTF();
+                String surname = in.readUTF();
+                String albumNumber = in.readUTF();
+                Student s = new Student(name, surname, albumNumber, g);
+                g.addStudent(s);
+            }
+
+            groupList.add(g);
+        }
+    }
 }
