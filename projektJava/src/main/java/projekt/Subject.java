@@ -62,4 +62,8 @@ public class Subject {
 	public void updateCriterion(Criteria criteria, int newMax) {
 		gradingCriteria.put(criteria, newMax);
 	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
 }
