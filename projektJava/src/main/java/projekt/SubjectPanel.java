@@ -7,6 +7,13 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Natalia Rzeszótko
+ *Klasa reprezentująca okienko dialogowe związane ze Sekcją Przedmioty
+ *  możemy do niej własnorecznie wpisać przedmioty ,edytować i usuwać
+ *   oraz importować i exportować dane
+ */
+
 public class SubjectPanel extends JPanel {
 
     private MyWindow parentWindow;
@@ -53,12 +60,12 @@ public class SubjectPanel extends JPanel {
         backButton.addActionListener(e -> parentWindow.showMenu());
     }
 
+
     private void addSubject() {
         JTextField subjectNameField = new JTextField();
 
         Object[] message = {
-                "Nazwa Przedmiotu:", subjectNameField
-        };
+                "Nazwa Przedmiotu:", subjectNameField };
 
         int option = JOptionPane.showConfirmDialog(this, message, "Dodaj Przedmiot", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {

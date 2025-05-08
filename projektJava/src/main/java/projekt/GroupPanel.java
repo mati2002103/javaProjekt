@@ -8,6 +8,13 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Natalia Rzeszótko
+ *Klasa reprezentująca okienko dialogowe związane ze Sekcją Grupy
+ *  możemy do niej własnorecznie wpisać grupy,edytować i usuwać
+ *   oraz importować i exportować dane
+ */
+
 public class GroupPanel extends JPanel {
 
     private MyWindow parentWindow;
