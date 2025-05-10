@@ -1,11 +1,15 @@
 package projekt;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author
+ *Klasa reprezentująca okienko dialogowe związane ze wyszukiwaniem studentów
+ *  po określonych danych podanych przez użytkownika
+ */
 public class SearchStudentPanel extends JPanel {
 
     private MyWindow parentWindow;

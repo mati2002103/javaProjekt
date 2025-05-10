@@ -3,7 +3,7 @@ package projekt;
 import javax.swing.*;
 import java.awt.*;
 /**
- * @author Natalia Rzeszótko
+ * @author
  *
  *Głona klasa okienka dialogowego w którym możemy przejść do wybranych przez nas sekcji(Student, grupy czy przedmioty)
  * za pomocá cardLayout który umożliwia przechowywanie wielu paneliw jednym kontenerze

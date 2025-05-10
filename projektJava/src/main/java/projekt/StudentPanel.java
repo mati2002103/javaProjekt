@@ -8,15 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 /**
  *
- * @author Natalia Rzeszótko
+ * @author
  *
  * Klasa reprezentująca okienko dialogowe związane ze Sekcją studenta
  * w której można dodawać,edytować, usuwać własnoręcznie
  * można równierz importować i exportować
  *
  */
-
-
 
 public class StudentPanel extends JPanel {
 
@@ -43,6 +41,7 @@ public class StudentPanel extends JPanel {
         JButton addButton = new JButton("Dodaj Studenta");
         JButton editButton = new JButton("Edytuj Studenta");
         JButton deleteButton = new JButton("Usuń Studenta");
+        JButton scoreButton = new JButton("Pokaż wyniki");
         JButton importButton = new JButton("Importuj");
         JButton exportButton = new JButton("Eksportuj");
         JButton backButton = new JButton("Wróć");
@@ -50,6 +49,7 @@ public class StudentPanel extends JPanel {
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(scoreButton);
         buttonPanel.add(importButton);
         buttonPanel.add(exportButton);
         buttonPanel.add(backButton);
@@ -59,6 +59,7 @@ public class StudentPanel extends JPanel {
         addButton.addActionListener(e -> addStudent());
         editButton.addActionListener(e -> editStudent(studentTable));
         deleteButton.addActionListener(e -> deleteStudent(studentTable));
+        scoreButton.addActionListener(e -> showStudentScores(studentTable));
         importButton.addActionListener(e -> importStudents());
         exportButton.addActionListener(e -> exportStudents());
         backButton.addActionListener(e -> parentWindow.showMenu());
@@ -165,7 +166,7 @@ public class StudentPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Student został pomyślnie usunięty!");
         }
     }
-//importujemy wybrany folder z potrzebnymi nam danymi
+    //importujemy wybrany folder z potrzebnymi nam danymi
     private void importStudents() {
         JFileChooser fileChooser = new JFileChooser();
         int option = fileChooser.showOpenDialog(this);
@@ -195,6 +196,27 @@ public class StudentPanel extends JPanel {
         }
     }
 
+    private void showStudentScores(JTable studentTable) {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Wybierz studenta, aby zobaczyć jego wyniki!", "Błąd", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Student selectedStudent = studentList.get(selectedRow);
+
+        // Tworzymy nowe okno dialogowe
+        JDialog scoreDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Wyniki Studenta", true);
+        scoreDialog.setSize(400, 300);
+        scoreDialog.setLocationRelativeTo(this);
+
+        // Dodajemy panel z wynikami
+       //StudentScorePanel scorePanel = new StudentScorePanel(selectedStudent);
+        //scoreDialog.add(scorePanel);
+
+        // Wyświetlamy okno dialogowe
+        scoreDialog.setVisible(true);
+    }
     private void refreshStudentTable() {
         studentTableModel.setRowCount(0); // Czyści tabelę
         for (Student student : studentDB.getStudents()) {
