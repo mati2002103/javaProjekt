@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * @author Wiśniewski Mateusz
- * 
+ *
  *         Klasa reprezentująca przedmiot akademicki, zawierająca jego nazwę
  *         oraz kryteria oceniania wraz z maksymalnymi punktami.
  */
@@ -66,4 +66,8 @@ public class Subject {
 	public void setSubjectName(String subjectName) {
 		this.subjectName = subjectName;
 	}
+	public int getTotalMaxPoints() {
+		return gradingCriteria.values().stream().mapToInt(Integer::intValue).sum();
+	}
+
 }

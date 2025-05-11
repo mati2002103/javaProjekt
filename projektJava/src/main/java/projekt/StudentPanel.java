@@ -6,16 +6,11 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-/**
- *
- * @author
- *
- * Klasa reprezentująca okienko dialogowe związane ze Sekcją studenta
- * w której można dodawać,edytować, usuwać własnoręcznie
- * można równierz importować i exportować
- *
- */
 
+/**
+ * Klasa reprezentująca okienko dialogowe związane ze Sekcją Studenta,
+ * w której można dodawać, edytować, usuwać studentów oraz importować i eksportować dane.
+ */
 public class StudentPanel extends JPanel {
 
     private MyWindow parentWindow;
@@ -26,7 +21,7 @@ public class StudentPanel extends JPanel {
     public StudentPanel(MyWindow parentWindow, StudentDB studentDB) {
         this.parentWindow = parentWindow;
         this.studentList = new ArrayList<>();
-        this.studentDB = new StudentDB(); // Inicjalizacja bazy danych studentów
+        this.studentDB = studentDB; // Inicjalizacja bazy danych studentów
 
         setLayout(new BorderLayout());
 
@@ -41,7 +36,8 @@ public class StudentPanel extends JPanel {
         JButton addButton = new JButton("Dodaj Studenta");
         JButton editButton = new JButton("Edytuj Studenta");
         JButton deleteButton = new JButton("Usuń Studenta");
-        JButton scoreButton = new JButton("Pokaż wyniki");
+        JButton scoreButton = new JButton("Pokaż Wyniki");
+        JButton assignButton = new JButton("Przypisz wynik");
         JButton importButton = new JButton("Importuj");
         JButton exportButton = new JButton("Eksportuj");
         JButton backButton = new JButton("Wróć");
@@ -50,6 +46,7 @@ public class StudentPanel extends JPanel {
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(scoreButton);
+        buttonPanel.add(assignButton);
         buttonPanel.add(importButton);
         buttonPanel.add(exportButton);
         buttonPanel.add(backButton);
@@ -60,11 +57,13 @@ public class StudentPanel extends JPanel {
         editButton.addActionListener(e -> editStudent(studentTable));
         deleteButton.addActionListener(e -> deleteStudent(studentTable));
         scoreButton.addActionListener(e -> showStudentScores(studentTable));
+        assignButton.addActionListener(e -> openAssignSubjectPanel(studentTable)); // Obsługa przycisku "Przypisz wynik"
         importButton.addActionListener(e -> importStudents());
         exportButton.addActionListener(e -> exportStudents());
         backButton.addActionListener(e -> parentWindow.showMenu());
     }
-    //  tworzymy nowego studenta
+
+    // Tworzymy nowego studenta
     private void addStudent() {
         JTextField nameField = new JTextField();
         JTextField surnameField = new JTextField();
@@ -84,9 +83,12 @@ public class StudentPanel extends JPanel {
             String surname = surnameField.getText().trim();
             String albumNumber = albumNumberField.getText().trim();
             String groupCode = groupField.getText().trim();
-// sprawdzamy czy wymagane pola nie są puste w przeciwnym wymadku wyskakuje nam błąd
+
+            // Sprawdzamy, czy wymagane pola nie są puste
             if (name.isEmpty() || surname.isEmpty() || albumNumber.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Imię, nazwisko i numer albumu muszą być wypełnione!", "Błąd", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Imię, nazwisko i numer albumu muszą być wypełnione!",
+                        "Błąd", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -98,13 +100,14 @@ public class StudentPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Student został pomyślnie dodany!");
         }
     }
-//edytujemy już utworzonego studenta na podtawie przypisywania mu nowych wartosci(imienia,nazwiska,nr albumu)
 
-
+    // Edytujemy dane studenta tylko po jego wybraniu w tabeli
     private void editStudent(JTable studentTable) {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Wybierz studenta do edycji!", "Błąd", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Wybierz studenta do edycji!",
+                    "Błąd", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -121,7 +124,6 @@ public class StudentPanel extends JPanel {
                 "Numer Albumu:", albumNumberField,
                 "Grupa:", groupField
         };
-        // rownierz sprawdzamy czy wymagane pola nie są puste
 
         int option = JOptionPane.showConfirmDialog(this, message, "Edytuj Studenta", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
@@ -130,8 +132,11 @@ public class StudentPanel extends JPanel {
             String albumNumber = albumNumberField.getText().trim();
             String groupCode = groupField.getText().trim();
 
+            // Sprawdzamy, czy wymagane pola nie są puste
             if (name.isEmpty() || surname.isEmpty() || albumNumber.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Imię, nazwisko i numer albumu muszą być wypełnione!", "Błąd", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Imię, nazwisko i numer albumu muszą być wypełnione!",
+                        "Błąd", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -149,16 +154,19 @@ public class StudentPanel extends JPanel {
         }
     }
 
-// usuwanie studenta
-
+    // Usuwanie studenta
     private void deleteStudent(JTable studentTable) {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Wybierz studenta do usunięcia!", "Błąd", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Wybierz studenta do usunięcia!",
+                    "Błąd", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        int option = JOptionPane.showConfirmDialog(this, "Czy na pewno chcesz usunąć wybranego studenta?", "Potwierdzenie", JOptionPane.YES_NO_OPTION);
+        int option = JOptionPane.showConfirmDialog(this,
+                "Czy na pewno chcesz usunąć wybranego studenta?",
+                "Potwierdzenie", JOptionPane.YES_NO_OPTION);
         if (option == JOptionPane.YES_OPTION) {
             Student student = studentList.remove(selectedRow);
             studentDB.deleteStudentFromStudentList(student);
@@ -166,7 +174,8 @@ public class StudentPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Student został pomyślnie usunięty!");
         }
     }
-    //importujemy wybrany folder z potrzebnymi nam danymi
+
+    // Import studentów
     private void importStudents() {
         JFileChooser fileChooser = new JFileChooser();
         int option = fileChooser.showOpenDialog(this);
@@ -177,11 +186,14 @@ public class StudentPanel extends JPanel {
                 refreshStudentTable();
                 JOptionPane.showMessageDialog(this, "Studenci zostali pomyślnie zaimportowani!");
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Błąd podczas importowania studentów: " + e.getMessage(), "Błąd", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Błąd podczas importowania studentów: " + e.getMessage(),
+                        "Błąd", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
-    //exportujemy dane które wprowadziliśmy do jakiegoś pliku
+
+    // Eksport studentów
     private void exportStudents() {
         JFileChooser fileChooser = new JFileChooser();
         int option = fileChooser.showSaveDialog(this);
@@ -191,15 +203,20 @@ public class StudentPanel extends JPanel {
                 studentDB.saveToFile(out);
                 JOptionPane.showMessageDialog(this, "Studenci zostali pomyślnie wyeksportowani!");
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Błąd podczas eksportowania studentów: " + e.getMessage(), "Błąd", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Błąd podczas eksportowania studentów: " + e.getMessage(),
+                        "Błąd", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
+    // Wyświetlanie wyników studenta
     private void showStudentScores(JTable studentTable) {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Wybierz studenta, aby zobaczyć jego wyniki!", "Błąd", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Wybierz studenta, aby zobaczyć jego wyniki!",
+                    "Błąd", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -211,12 +228,41 @@ public class StudentPanel extends JPanel {
         scoreDialog.setLocationRelativeTo(this);
 
         // Dodajemy panel z wynikami
-       //StudentScorePanel scorePanel = new StudentScorePanel(selectedStudent);
-        //scoreDialog.add(scorePanel);
+        // StudentScorePanel scorePanel = new StudentScorePanel(selectedStudent);
+        // scoreDialog.add(scorePanel);
 
         // Wyświetlamy okno dialogowe
         scoreDialog.setVisible(true);
     }
+
+    // Otwieranie panelu AssignSubjectPanel
+    private void openAssignSubjectPanel(JTable studentTable) {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Wybierz studenta, aby przypisać wynik!",
+                    "Błąd", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Student selectedStudent = studentList.get(selectedRow);
+
+        // Tworzymy nowe okno dialogowe dla AssignSubjectPanel
+        JDialog assignSubjectDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Przypisz Wynik", true);
+        assignSubjectDialog.setSize(600, 400);
+        assignSubjectDialog.setLocationRelativeTo(this);
+
+//        // Tworzymy i dodajemy panel AssignSubjectPanel
+//        AssignSubjectPanel assignSubjectPanel = new AssignSubjectPanel(selectedStudent, subjectList);
+//        assignSubjectDialog.add(assignSubjectPanel);
+
+        // Wyświetlamy okno dialogowe
+        assignSubjectDialog.setVisible(true);
+    }
+
+
+
+    // Odświeżanie tabeli studentów
     private void refreshStudentTable() {
         studentTableModel.setRowCount(0); // Czyści tabelę
         for (Student student : studentDB.getStudents()) {
