@@ -5,13 +5,34 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.*;
 
+/**
+ * Panel odpowiedzialny za zarządzanie przedmiotami w aplikacji.
+ * Umożliwia dodawanie nowych przedmiotów, edycję kryteriów oceniania oraz usuwanie przedmiotów.
+ * Przedmioty są wyświetlane w tabeli wraz z przypisanymi kryteriami.
+ * 
+ * @author 
+ *     Wiśniewski Mateusz
+ */
 public class SubjectPanel extends JPanel {
 
+    /** Referencja do głównego okna aplikacji */
     private MyWindow parentWindow;
+
+    /** Baza danych przedmiotów */
     private SubjectDB subjectDB;
+
+    /** Model tabeli wyświetlającej przedmioty */
     private DefaultTableModel subjectTableModel;
+
+    /** Tabela wyświetlająca przedmioty i ich kryteria */
     private JTable subjectTable;
 
+    /**
+     * Konstruktor tworzy panel oraz inicjalizuje komponenty GUI.
+     *
+     * @param parentWindow referencja do głównego okna aplikacji
+     * @param subjectDB    baza danych przedmiotów
+     */
     public SubjectPanel(MyWindow parentWindow, SubjectDB subjectDB) {
         this.parentWindow = parentWindow;
         this.subjectDB = subjectDB;
@@ -43,6 +64,10 @@ public class SubjectPanel extends JPanel {
         refreshTable();
     }
 
+    /**
+     * Otwiera okno dialogowe umożliwiające dodanie nowego przedmiotu.
+     * Po zatwierdzeniu dodaje go do bazy danych i odświeża tabelę.
+     */
     private void addSubject() {
         String subjectName = JOptionPane.showInputDialog(this, "Podaj nazwę przedmiotu:");
         if (subjectName != null && !subjectName.trim().isEmpty()) {
@@ -52,6 +77,10 @@ public class SubjectPanel extends JPanel {
         }
     }
 
+    /**
+     * Umożliwia edycję kryteriów oceniania wybranego przedmiotu.
+     * Pozwala dodawać i usuwać kryteria oraz ustalać maksymalne punkty.
+     */
     private void editCriteria() {
         int selectedRow = subjectTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -120,6 +149,9 @@ public class SubjectPanel extends JPanel {
         refreshTable();
     }
 
+    /**
+     * Usuwa wybrany przedmiot z bazy danych i aktualizuje tabelę.
+     */
     private void deleteSubject() {
         int selectedRow = subjectTable.getSelectedRow();
         if (selectedRow == -1) return;
@@ -130,6 +162,9 @@ public class SubjectPanel extends JPanel {
         }
     }
 
+    /**
+     * Odświeża tabelę wyświetlającą wszystkie przedmioty i ich kryteria oceniania.
+     */
     public void refreshTable() {
         subjectTableModel.setRowCount(0);
         for (Subject subject : subjectDB.getAllSubjects()) {

@@ -1,4 +1,5 @@
 package projekt;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -6,16 +7,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * Klasa reprezentująca panel do wyszukiwania studentów
+ * po określonych danych podanych przez użytkownika (imię, nazwisko, numer albumu, grupa).
+ * <p>
+ * Wyniki są wyświetlane w tabeli i filtrowane dynamicznie na podstawie danych wejściowych.
+ * </p>
+ * 
  * @author
- *Klasa reprezentująca okienko dialogowe związane ze wyszukiwaniem studentów
- *  po określonych danych podanych przez użytkownika
+ *     Wiśniewski Mateusz
  */
 public class SearchStudentPanel extends JPanel {
 
+    /** Główne okno aplikacji, umożliwia powrót do menu */
     private MyWindow parentWindow;
+
+    /** Baza danych studentów, z której pobierane są wyniki */
     private StudentDB studentDB;
+
+    /** Model tabeli wyników wyszukiwania */
     private DefaultTableModel resultTableModel;
 
+    /**
+     * Tworzy nowy panel wyszukiwania studentów.
+     *
+     * @param parentWindow główne okno aplikacji
+     * @param studentDB    baza danych studentów
+     */
     public SearchStudentPanel(MyWindow parentWindow, StudentDB studentDB) {
         this.parentWindow = parentWindow;
         this.studentDB = studentDB;
@@ -43,7 +60,7 @@ public class SearchStudentPanel extends JPanel {
 
         add(searchPanel, BorderLayout.NORTH);
 
-        // Model tabeli wyników
+        // Tabela wyników
         resultTableModel = new DefaultTableModel(new String[]{"Imię", "Nazwisko", "Numer Albumu", "Grupa"}, 0);
         JTable resultTable = new JTable(resultTableModel);
         JScrollPane scrollPane = new JScrollPane(resultTable);
@@ -65,19 +82,27 @@ public class SearchStudentPanel extends JPanel {
         });
     }
 
+    /**
+     * Wyszukuje studentów na podstawie wprowadzonych kryteriów
+     * i aktualizuje tabelę wyników.
+     *
+     * @param name         imię studenta (lub fragment)
+     * @param surname      nazwisko studenta (lub fragment)
+     * @param albumNumber  numer albumu studenta (lub fragment)
+     * @param groupCode    kod grupy (lub fragment)
+     */
     private void searchStudents(String name, String surname, String albumNumber, String groupCode) {
-        // Czyszczenie tabeli wyników
-        resultTableModel.setRowCount(0);
+        resultTableModel.setRowCount(0); // wyczyść poprzednie wyniki
 
-        // Filtracja studentów na podstawie kryteriów
         List<Student> filteredStudents = studentDB.getStudents().stream()
                 .filter(student -> (name.isEmpty() || student.getName().toLowerCase().contains(name.toLowerCase())))
                 .filter(student -> (surname.isEmpty() || student.getSurname().toLowerCase().contains(surname.toLowerCase())))
                 .filter(student -> (albumNumber.isEmpty() || student.getAlbumNumber().contains(albumNumber)))
-                .filter(student -> (groupCode.isEmpty() || (student.getGroup() != null && student.getGroup().getGroupCode().toLowerCase().contains(groupCode.toLowerCase()))))
+                .filter(student -> (groupCode.isEmpty() || 
+                        (student.getGroup() != null &&
+                        student.getGroup().getGroupCode().toLowerCase().contains(groupCode.toLowerCase()))))
                 .collect(Collectors.toList());
 
-        // Dodawanie wyników do tabeli
         for (Student student : filteredStudents) {
             resultTableModel.addRow(new Object[]{
                     student.getName(),
@@ -88,7 +113,10 @@ public class SearchStudentPanel extends JPanel {
         }
 
         if (filteredStudents.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nie znaleziono studentów spełniających podane kryteria.", "Brak wyników", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Nie znaleziono studentów spełniających podane kryteria.",
+                    "Brak wyników",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }

@@ -8,116 +8,114 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.List;
 
+/**
+ * Klasa testowa dla klasy GroupDB, sprawdzająca poprawność operacji dodawania,
+ * usuwania, aktualizacji, wyszukiwania i serializacji grup studenckich.
+ */
 class GroupDBTest {
 
     private GroupDB groupDB;
     private Group group;
     private Student student;
 
-    // Przygotowanie danych testowych przed każdym testem
+    /**
+     * Inicjalizuje obiekty testowe przed każdym testem:
+     * tworzy bazę grup, grupę oraz przypisanego do niej studenta.
+     */
     @BeforeEach
     void setUp() {
-        // Tworzymy nową bazę grup
         groupDB = new GroupDB();
-        
-        // Tworzymy grupę
         group = new Group("ID05TC01", "Technologia chmury", "Grupa dla studentów zainteresowanych chmurą");
-        
-        // Tworzymy studenta i przypisujemy go do grupy
         student = new Student("Jan", "Kowalski", "123456", group);
-        group.addStudent(student); // Dodajemy studenta do grupy
+        group.addStudent(student);
     }
 
-    // Testujemy dodawanie grupy do bazy
+    /**
+     * Testuje dodawanie grupy do bazy danych.
+     *
+     * @see GroupDB#addGroup(Group)
+     */
     @Test
     void testAddGroup() {
-        // Sprawdzamy, czy początkowo baza grup jest pusta
         assertTrue(groupDB.getAllGroups().isEmpty());
-        
-        // Dodajemy grupę do bazy
         groupDB.addGroup(group);
-        
-        // Sprawdzamy, czy grupa została dodana
         List<Group> groups = groupDB.getAllGroups();
-        assertEquals(1, groups.size()); // Powinna zawierać 1 grupę
-        assertTrue(groups.contains(group)); // Grupa powinna być w bazie
+        assertEquals(1, groups.size());
+        assertTrue(groups.contains(group));
     }
 
-    // Testujemy metodę getGroupByCode
+    /**
+     * Testuje poprawność wyszukiwania grupy po jej kodzie.
+     *
+     * @see GroupDB#getGroupByCode(String)
+     */
     @Test
     void testGetGroupByCode() {
-        // Dodajemy grupę do bazy
         groupDB.addGroup(group);
-        
-        // Sprawdzamy, czy grupa została poprawnie odnaleziona po kodzie
         Group foundGroup = groupDB.getGroupByCode("ID05TC01");
-        assertNotNull(foundGroup); // Grupa powinna zostać znaleziona
-        assertEquals(group, foundGroup); // Sprawdzamy, czy odnaleziona grupa to ta sama
+        assertNotNull(foundGroup);
+        assertEquals(group, foundGroup);
     }
 
-    // Testujemy metodę updateGroup
+    /**
+     * Testuje aktualizowanie specjalizacji i opisu grupy.
+     *
+     * @see GroupDB#updateGroup(String, String, String)
+     */
     @Test
     void testUpdateGroup() {
-        // Dodajemy grupę do bazy
         groupDB.addGroup(group);
-        
-        // Sprawdzamy, czy początkowe dane grupy są takie, jak oczekiwano
         assertEquals("Technologia chmury", group.getSpecialization());
         assertEquals("Grupa dla studentów zainteresowanych chmurą", group.getDescription());
 
-        // Aktualizujemy dane grupy
         boolean updated = groupDB.updateGroup("ID05TC01", "Technologie webowe", "Grupa dla studentów zajmujących się technologiami webowymi");
-        
-        // Sprawdzamy, czy aktualizacja się powiodła
-        assertTrue(updated); 
-        
-        // Sprawdzamy, czy dane grupy zostały zaktualizowane
+
+        assertTrue(updated);
         assertEquals("Technologie webowe", group.getSpecialization());
         assertEquals("Grupa dla studentów zajmujących się technologiami webowymi", group.getDescription());
     }
 
-    // Testujemy metodę deleteGroup
+    /**
+     * Testuje usuwanie grupy z bazy danych.
+     *
+     * @see GroupDB#deleteGroup(String)
+     */
     @Test
     void testDeleteGroup() {
-        // Dodajemy grupę do bazy
         groupDB.addGroup(group);
-        
-        // Sprawdzamy, czy grupa została dodana
         assertEquals(1, groupDB.getAllGroups().size());
-        
-        // Usuwamy grupę z bazy
+
         boolean deleted = groupDB.deleteGroup("ID05TC01");
-        
-        // Sprawdzamy, czy usunięcie się powiodło
+
         assertTrue(deleted);
-        
-        // Sprawdzamy, czy grupa została usunięta
-        assertTrue(groupDB.getAllGroups().isEmpty()); // Baza powinna być pusta
+        assertTrue(groupDB.getAllGroups().isEmpty());
     }
 
-    // Testujemy metodę saveToFile i loadFromFile
+    /**
+     * Testuje zapis bazy danych do pliku i jej ponowne wczytanie.
+     *
+     * @throws IOException jeśli wystąpi błąd operacji plikowych
+     * @see GroupDB#saveToFile(DataOutputStream)
+     * @see GroupDB#loadFromFile(DataInputStream)
+     */
     @Test
     void testSaveAndLoadFromFile() throws IOException {
-        // Dodajemy grupę do bazy
         groupDB.addGroup(group);
-        
-        // Zapisujemy dane do pliku tymczasowego
+
         File tempFile = File.createTempFile("testGroups", ".dat");
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(tempFile))) {
             groupDB.saveToFile(out);
         }
-        
-        // Wczytujemy dane z pliku do nowej instancji GroupDB
+
         GroupDB loadedGroupDB = new GroupDB();
         try (DataInputStream in = new DataInputStream(new FileInputStream(tempFile))) {
             loadedGroupDB.loadFromFile(in);
         }
-        
-        // Sprawdzamy, czy dane zostały poprawnie załadowane
+
         List<Group> loadedGroups = loadedGroupDB.getAllGroups();
-        assertEquals(1, loadedGroups.size()); // Powinna zawierać 1 grupę
+        assertEquals(1, loadedGroups.size());
         Group loadedGroup = loadedGroups.get(0);
-        assertEquals("ID05TC01", loadedGroup.getGroupCode()); // Sprawdzamy kod grupy
-        assertEquals("Technologia chmury", loadedGroup.getSpecialization()); // Sprawdzamy specjalizację
+        assertEquals("ID05TC01", loadedGroup.getGroupCode());
+        assertEquals("Technologia chmury", loadedGroup.getSpecialization());
     }
 }
