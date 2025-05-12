@@ -7,55 +7,80 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+/**
+ * Klasa testowa do testowania funkcjonalności klasy {@link Group}.
+ * Sprawdza poprawność konstruktora, dodawanie studentów oraz obsługę duplikatów.
+ *
+ * @see Group
+ * @see Student
+ */
 class GroupTest {
 
     private Group group;
     private Student student;
 
-    // Ustawiamy wspólne dane przed każdym testem
+    /**
+     * Inicjalizacja wspólnych danych testowych przed każdym testem.
+     * Tworzy przykładową grupę oraz przypisanego do niej studenta.
+     *
+     * @see Group#Group(String, String, String)
+     * @see Student#Student(String, String, String, Group)
+     */
     @BeforeEach
     void setUp() {
-        // Tworzymy nową grupę z przykładowymi danymi
         group = new Group("ID05TC01", "Technologia chmury", "Grupa dla studentów zainteresowanych chmurą");
-        
-        // Tworzymy studenta przypisanego do tej grupy
         student = new Student("Jan", "Kowalski", "123456", group);
     }
 
-    // Testujemy konstruktor klasy Group, który inicjalizuje grupę z parametrami
+    /**
+     * Testuje konstruktor klasy {@link Group}.
+     * Sprawdza poprawność przypisania wartości do pól oraz czy zbiór studentów jest pusty.
+     *
+     * @see Group#Group(String, String, String)
+     * @see Group#getGroupCode()
+     * @see Group#getSpecialization()
+     * @see Group#getDescription()
+     * @see Group#getStudents()
+     */
     @Test
     void testGroupConstructorWithArguments() {
-        // Sprawdzamy, czy grupy zostały poprawnie przypisane
         assertNotNull(group);
         assertEquals("ID05TC01", group.getGroupCode());
         assertEquals("Technologia chmury", group.getSpecialization());
         assertEquals("Grupa dla studentów zainteresowanych chmurą", group.getDescription());
-        
-        // Sprawdzamy, czy grupa nie ma jeszcze przypisanych studentów
         assertTrue(group.getStudents().isEmpty());
     }
 
-    // Testujemy dodanie studenta do grupy
+    /**
+     * Testuje metodę {@link Group#addStudent(Student)}.
+     * Sprawdza, czy student został poprawnie dodany do zbioru studentów w grupie.
+     *
+     * @see Group#addStudent(Student)
+     * @see Group#getStudents()
+     * @see Student
+     */
     @Test
     void testAddStudent() {
         group.addStudent(student);
-        
-        // Pobieramy listę studentów przypisanych do grupy
         Set<Student> students = group.getStudents();
-        
-        // Sprawdzamy, czy lista studentów zawiera właśnie dodanego studenta
-        assertEquals(1, students.size()); // Lista powinna zawierać 1 studenta
-        assertTrue(students.contains(student)); // Grupa powinna zawierać tego studenta
+
+        assertEquals(1, students.size());
+        assertTrue(students.contains(student));
     }
 
-    // Testujemy, co się stanie, gdy spróbujemy dodać tego samego studenta więcej niż raz
+    /**
+     * Testuje dodanie tego samego studenta więcej niż jeden raz.
+     * Sprawdza, czy zbiór studentów nie zawiera duplikatów (zbiór Set).
+     *
+     * @see Group#addStudent(Student)
+     * @see Group#getStudents()
+     */
     @Test
     void testAddDuplicateStudent() {
         group.addStudent(student);
-        group.addStudent(student); // próbujemy dodać tego samego studenta ponownie
-        
-        // Sprawdzamy, czy lista studentów nadal zawiera tylko 1 studenta
+        group.addStudent(student);
+
         Set<Student> students = group.getStudents();
-        assertEquals(1, students.size()); // Powinna być tylko 1 kopia studenta
+        assertEquals(1, students.size());
     }
 }

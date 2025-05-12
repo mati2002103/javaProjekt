@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ *   Klasa reprezentująca grupę studencką, zawierającą informacje o kodzie
+ *   grupy, specjalizacji, opisie oraz przypisanych studentach.
+ * 
  * @author Wiśniewski Mateusz
  * 
- *         Klasa reprezentująca grupę studencką, zawierającą informacje o kodzie
- *         grupy, specjalizacji, opisie oraz przypisanych studentach.
+ *       
  */
 public class Group {
 

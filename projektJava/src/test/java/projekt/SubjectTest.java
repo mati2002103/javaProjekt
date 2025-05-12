@@ -8,27 +8,46 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Klasa testowa dla klasy {@link Subject}, testująca operacje na nazwie przedmiotu
+ * oraz zarządzanie kryteriami oceniania.
+ */
 class SubjectTest {
 
     private Subject subject;
 
+    /**
+     * Inicjalizacja nowego obiektu {@link Subject} przed każdym testem.
+     */
     @BeforeEach
     void setUp() {
         subject = new Subject("Matematyka");
     }
 
+    /**
+     * Test konstruktora oraz getterów.
+     * Sprawdza poprawność inicjalizacji nazwy przedmiotu i pustych kryteriów.
+     */
     @Test
     void testConstructorAndGetters() {
         assertEquals("Matematyka", subject.getSubjectName());
         assertTrue(subject.getGradingCriteria().isEmpty());
     }
 
+    /**
+     * Test zmiany nazwy przedmiotu za pomocą metody {@link Subject#setSubjectName(String)}.
+     */
     @Test
     void testSetSubjectName() {
         subject.setSubjectName("Fizyka");
         assertEquals("Fizyka", subject.getSubjectName());
     }
 
+    /**
+     * Test dodania nowego kryterium oceniania.
+     *
+     * @see Subject#updateCriterion(String, int)
+     */
     @Test
     void testUpdateCriterion_AddNew() {
         subject.updateCriterion("Egzamin", 100);
@@ -37,6 +56,9 @@ class SubjectTest {
         assertEquals(100, criteria.get("Egzamin"));
     }
 
+    /**
+     * Test nadpisania istniejącego kryterium oceniania.
+     */
     @Test
     void testUpdateCriterion_UpdateExisting() {
         subject.updateCriterion("Kolokwium", 40);
@@ -45,6 +67,9 @@ class SubjectTest {
         assertEquals(50, subject.getGradingCriteria().get("Kolokwium"));
     }
 
+    /**
+     * Test usuwania kryterium oceniania z mapy kryteriów.
+     */
     @Test
     void testRemoveCriterion() {
         subject.updateCriterion("Projekt", 60);
@@ -52,6 +77,11 @@ class SubjectTest {
         assertFalse(subject.getGradingCriteria().containsKey("Projekt"));
     }
 
+    /**
+     * Test wyliczania łącznej maksymalnej liczby punktów na podstawie kryteriów oceniania.
+     *
+     * @see Subject#getTotalMaxPoints()
+     */
     @Test
     void testGetTotalMaxPoints() {
         subject.updateCriterion("Egzamin", 70);
@@ -60,6 +90,11 @@ class SubjectTest {
         assertEquals(100, subject.getTotalMaxPoints());
     }
 
+    /**
+     * Test ustawienia nowych kryteriów oceniania poprzez {@link Subject#setGradingCriteria(Map)}.
+     *
+     * @param newCriteria nowe kryteria w postaci mapy nazw do wartości punktowych
+     */
     @Test
     void testSetGradingCriteria() {
         Map<String, Integer> newCriteria = new LinkedHashMap<>();
