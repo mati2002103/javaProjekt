@@ -6,178 +6,240 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 
+/**
+ * Główne okno aplikacji GUI służącej do zarządzania studentami, grupami i przedmiotami.
+ * <p>
+ * Klasa odpowiada za nawigację między panelami oraz import/eksport danych.
+ * </p>
+ * 
+ * @author
+ *     Wiśniewski Mateusz
+ */
 public class MyWindow extends JFrame {
-	private StudentPanel studentPanel;
-	private GroupPanel groupPanel;
-	private SubjectPanel subjectPanel;
-	private SearchStudentPanel searchStudentPanel;
 
-	private final CardLayout cardLayout;
-	private final JPanel mainPanel;
-	private final StudentDB studentDB;
-	private final SubjectDB subjectDB;
-	private final GroupDB groupDB;
+    /** Panel zarządzania studentami */
+    private StudentPanel studentPanel;
 
-	public MyWindow() {
-		super("Aplikacja do zarządzania studentami, grupami i przedmiotami");
-		initializeWindow();
+    /** Panel zarządzania grupami */
+    private GroupPanel groupPanel;
 
-		// Inicjalizacja wspólnych baz danych
-		studentDB = new StudentDB();
-		subjectDB = new SubjectDB();
-		groupDB = new GroupDB();
+    /** Panel zarządzania przedmiotami */
+    private SubjectPanel subjectPanel;
 
-		cardLayout = new CardLayout();
-		mainPanel = new JPanel(cardLayout);
+    /** Panel wyszukiwania studentów */
+    private SearchStudentPanel searchStudentPanel;
 
-		setupMenuPanel();
-		setupFunctionalPanels();
+    /** Layout do przełączania paneli */
+    private final CardLayout cardLayout;
 
-		add(mainPanel);
-		setVisible(true);
-	}
+    /** Główny panel kontenera dla wszystkich podpaneli */
+    private final JPanel mainPanel;
 
-	private void initializeWindow() {
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		setSize(1000, 600);
-		setLocationRelativeTo(null);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				confirmExit();
-			}
-		});
-	}
+    /** Baza danych studentów */
+    private final StudentDB studentDB;
 
-	private void setupMenuPanel() {
-		JPanel menuPanel = new JPanel(new BorderLayout());
+    /** Baza danych przedmiotów */
+    private final SubjectDB subjectDB;
 
-		// Główne przyciski nawigacyjne
-		JPanel navPanel = new JPanel(new GridLayout(4, 1, 10, 10));
-		navPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    /** Baza danych grup */
+    private final GroupDB groupDB;
 
-		String[] buttonLabels = { "Sekcja Studentów", "Sekcja Grup", "Sekcja Przedmiotów", "Wyszukiwanie Studenta" };
+    /**
+     * Konstruktor tworzący okno główne aplikacji.
+     * Inicjalizuje wszystkie panele i bazy danych.
+     */
+    public MyWindow() {
+        super("Aplikacja do zarządzania studentami, grupami i przedmiotami");
+        initializeWindow();
 
-		for (String label : buttonLabels) {
-			JButton button = new JButton(label);
-			button.setFont(new Font("Arial", Font.PLAIN, 16));
-			button.addActionListener(e -> handleMenuAction(label));
-			navPanel.add(button);
-		}
+        studentDB = new StudentDB();
+        subjectDB = new SubjectDB();
+        groupDB = new GroupDB();
 
-		// Panel z przyciskami import/export i wyjścia
-		JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-		JButton importButton = new JButton("Importuj wszystkie dane");
-		JButton exportButton = new JButton("Eksportuj wszystkie dane");
-		JButton exitButton = new JButton("Wyjdź");
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
 
-		importButton.addActionListener(e -> importAllData());
-		exportButton.addActionListener(e -> exportAllData());
-		exitButton.addActionListener(e -> confirmExit());
+        setupMenuPanel();
+        setupFunctionalPanels();
 
-		bottomPanel.add(importButton);
-		bottomPanel.add(exportButton);
-		bottomPanel.add(exitButton);
+        add(mainPanel);
+        setVisible(true);
+    }
 
-		menuPanel.add(navPanel, BorderLayout.CENTER);
-		menuPanel.add(bottomPanel, BorderLayout.SOUTH);
+    /**
+     * Inicjalizuje podstawowe właściwości okna (rozmiar, lokalizacja, akcja przy zamknięciu).
+     */
+    private void initializeWindow() {
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(1000, 600);
+        setLocationRelativeTo(null);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                confirmExit();
+            }
+        });
+    }
 
-		mainPanel.add(menuPanel, "Menu");
-	}
+    /**
+     * Tworzy panel menu głównego z przyciskami nawigacyjnymi i przyciskami import/eksport.
+     */
+    private void setupMenuPanel() {
+        JPanel menuPanel = new JPanel(new BorderLayout());
 
-	private void handleMenuAction(String action) {
-		switch (action) {
-		case "Sekcja Studentów":
-			cardLayout.show(mainPanel, "Student");
-			break;
-		case "Sekcja Grup":
-			cardLayout.show(mainPanel, "Group");
-			break;
-		case "Sekcja Przedmiotów":
-			cardLayout.show(mainPanel, "Subject");
-			break;
-		case "Wyszukiwanie Studenta":
-			cardLayout.show(mainPanel, "Search");
-			break;
-		}
-	}
+        JPanel navPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+        navPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-	private void setupFunctionalPanels() {
-		studentPanel = new StudentPanel(this, studentDB, subjectDB, groupDB);
-		groupPanel = new GroupPanel(this, groupDB);
-		subjectPanel = new SubjectPanel(this, subjectDB);
-		searchStudentPanel = new SearchStudentPanel(this, studentDB);
+        String[] buttonLabels = { "Sekcja Studentów", "Sekcja Grup", "Sekcja Przedmiotów", "Wyszukiwanie Studenta" };
 
-		mainPanel.add(studentPanel, "Student");
-		mainPanel.add(groupPanel, "Group");
-		mainPanel.add(subjectPanel, "Subject");
-		mainPanel.add(searchStudentPanel, "Search");
-	}
+        for (String label : buttonLabels) {
+            JButton button = new JButton(label);
+            button.setFont(new Font("Arial", Font.PLAIN, 16));
+            button.addActionListener(e -> handleMenuAction(label));
+            navPanel.add(button);
+        }
 
-	private void importAllData() {
-		JFileChooser chooser = new JFileChooser();
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			try (DataInputStream in = new DataInputStream(new FileInputStream(chooser.getSelectedFile()))) {
-				// Kolejność odczytu musi być zgodna z zapisem
-				groupDB.loadFromFile(in);
-				subjectDB.loadFromFile(in);
-				studentDB.loadFromFile(in, groupDB, subjectDB);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JButton importButton = new JButton("Importuj wszystkie dane");
+        JButton exportButton = new JButton("Eksportuj wszystkie dane");
+        JButton exitButton = new JButton("Wyjdź");
 
-				JOptionPane.showMessageDialog(this, "Dane zaimportowane pomyślnie!");
-				refreshAllPanels(); // <-- kluczowe dodanie
+        importButton.addActionListener(e -> importAllData());
+        exportButton.addActionListener(e -> exportAllData());
+        exitButton.addActionListener(e -> confirmExit());
 
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Błąd importu: " + e.getMessage(), "Błąd",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
+        bottomPanel.add(importButton);
+        bottomPanel.add(exportButton);
+        bottomPanel.add(exitButton);
 
-	private void exportAllData() {
-		JFileChooser chooser = new JFileChooser();
-		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chooser.getSelectedFile()))) {
-				// Kolejność zapisu musi być zgodna z odczytem
-				groupDB.saveToFile(out);
-				subjectDB.saveToFile(out);
-				studentDB.saveToFile(out);
+        menuPanel.add(navPanel, BorderLayout.CENTER);
+        menuPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-				JOptionPane.showMessageDialog(this, "Dane wyeksportowane pomyślnie!");
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Błąd eksportu: " + e.getMessage(), "Błąd",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
+        mainPanel.add(menuPanel, "Menu");
+    }
 
-	private void refreshAllPanels() {
-		studentPanel.refreshStudentTable();
-		groupPanel.refreshTable();
-		subjectPanel.refreshTable();
-	}
+    /**
+     * Obsługuje akcję przełączania widoku w zależności od wybranego przycisku menu.
+     *
+     * @param action etykieta przycisku, która determinuje wybór panelu
+     */
+    private void handleMenuAction(String action) {
+        switch (action) {
+            case "Sekcja Studentów":
+                cardLayout.show(mainPanel, "Student");
+                break;
+            case "Sekcja Grup":
+                cardLayout.show(mainPanel, "Group");
+                break;
+            case "Sekcja Przedmiotów":
+                cardLayout.show(mainPanel, "Subject");
+                break;
+            case "Wyszukiwanie Studenta":
+                cardLayout.show(mainPanel, "Search");
+                break;
+        }
+    }
 
-	private void confirmExit() {
-		int option = JOptionPane.showConfirmDialog(this, "Czy na pewno chcesz zamknąć aplikację?",
-				"Potwierdzenie wyjścia", JOptionPane.YES_NO_OPTION);
+    /**
+     * Inicjalizuje wszystkie funkcjonalne panele i dodaje je do głównego kontenera.
+     */
+    private void setupFunctionalPanels() {
+        studentPanel = new StudentPanel(this, studentDB, subjectDB, groupDB);
+        groupPanel = new GroupPanel(this, groupDB);
+        subjectPanel = new SubjectPanel(this, subjectDB);
+        searchStudentPanel = new SearchStudentPanel(this, studentDB);
 
-		if (option == JOptionPane.YES_OPTION) {
-			dispose();
-			System.exit(0);
-		}
-	}
+        mainPanel.add(studentPanel, "Student");
+        mainPanel.add(groupPanel, "Group");
+        mainPanel.add(subjectPanel, "Subject");
+        mainPanel.add(searchStudentPanel, "Search");
+    }
 
-	public void showMenu() {
-		cardLayout.show(mainPanel, "Menu");
-	}
+    /**
+     * Importuje dane studentów, grup i przedmiotów z pliku binarnego.
+     * Pokazuje komunikaty o sukcesie lub błędzie.
+     */
+    private void importAllData() {
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try (DataInputStream in = new DataInputStream(new FileInputStream(chooser.getSelectedFile()))) {
+                groupDB.loadFromFile(in);
+                subjectDB.loadFromFile(in);
+                studentDB.loadFromFile(in, groupDB, subjectDB);
 
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			new MyWindow();
-		});
-	}
+                JOptionPane.showMessageDialog(this, "Dane zaimportowane pomyślnie!");
+                refreshAllPanels();
+
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Błąd importu: " + e.getMessage(), "Błąd",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Eksportuje dane studentów, grup i przedmiotów do pliku binarnego.
+     * Pokazuje komunikaty o sukcesie lub błędzie.
+     */
+    private void exportAllData() {
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chooser.getSelectedFile()))) {
+                groupDB.saveToFile(out);
+                subjectDB.saveToFile(out);
+                studentDB.saveToFile(out);
+
+                JOptionPane.showMessageDialog(this, "Dane wyeksportowane pomyślnie!");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Błąd eksportu: " + e.getMessage(), "Błąd",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Odświeża wszystkie panele funkcjonalne, aby wyświetlały aktualne dane.
+     */
+    private void refreshAllPanels() {
+        studentPanel.refreshStudentTable();
+        groupPanel.refreshTable();
+        subjectPanel.refreshTable();
+    }
+
+    /**
+     * Wyświetla okno potwierdzenia przed zamknięciem aplikacji.
+     * Jeśli użytkownik zatwierdzi, program zostaje zakończony.
+     */
+    private void confirmExit() {
+        int option = JOptionPane.showConfirmDialog(this, "Czy na pewno chcesz zamknąć aplikację?",
+                "Potwierdzenie wyjścia", JOptionPane.YES_NO_OPTION);
+
+        if (option == JOptionPane.YES_OPTION) {
+            dispose();
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Pokazuje panel menu głównego aplikacji.
+     */
+    public void showMenu() {
+        cardLayout.show(mainPanel, "Menu");
+    }
+
+    /**
+     * Główna metoda uruchamiająca aplikację.
+     *
+     * @param args argumenty wiersza poleceń (nieużywane)
+     */
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            new MyWindow();
+        });
+    }
 }

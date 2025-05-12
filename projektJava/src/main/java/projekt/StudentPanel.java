@@ -5,15 +5,43 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Panel GUI służący do zarządzania listą studentów – umożliwia dodawanie, edytowanie, usuwanie oraz podgląd wyników.
+ * <p>
+ * Studenci są pobierani i zapisywani za pomocą {@link StudentDB}, {@link GroupDB} oraz {@link SubjectDB}.
+ * </p>
+ * 
+ * @author
+ *     Wiśniewski Mateusz
+ */
 public class StudentPanel extends JPanel {
 
+    /** Referencja do głównego okna aplikacji */
     private MyWindow parentWindow;
+
+    /** Baza danych studentów */
     private StudentDB studentDB;
+
+    /** Baza danych przedmiotów */
     private SubjectDB subjectDB;
+
+    /** Baza danych grup */
     private GroupDB groupDB;
+
+    /** Model tabeli studentów */
     private DefaultTableModel studentTableModel;
+
+    /** Tabela wyświetlająca studentów */
     private JTable studentTable;
 
+    /**
+     * Konstruktor panelu studentów.
+     *
+     * @param parentWindow główne okno aplikacji
+     * @param studentDB    baza danych studentów
+     * @param subjectDB    baza danych przedmiotów
+     * @param groupDB      baza danych grup
+     */
     public StudentPanel(MyWindow parentWindow, StudentDB studentDB, SubjectDB subjectDB, GroupDB groupDB) {
         this.parentWindow = parentWindow;
         this.studentDB = studentDB;
@@ -25,11 +53,10 @@ public class StudentPanel extends JPanel {
         studentTableModel = new DefaultTableModel(new String[]{"Imię", "Nazwisko", "Numer Albumu", "Grupa"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column != 2;
+                return column != 2; // numer albumu jest nieedytowalny
             }
         };
 
-        studentTable = new JTable(studentTableModel);
         studentTable = new JTable(studentTableModel);
         JScrollPane scrollPane = new JScrollPane(studentTable);
         add(scrollPane, BorderLayout.CENTER);
@@ -55,6 +82,9 @@ public class StudentPanel extends JPanel {
         backButton.addActionListener(e -> parentWindow.showMenu());
     }
 
+    /**
+     * Wyświetla formularz i dodaje nowego studenta na podstawie danych wprowadzonych przez użytkownika.
+     */
     private void addStudent() {
         JTextField nameField = new JTextField();
         JTextField surnameField = new JTextField();
@@ -99,6 +129,10 @@ public class StudentPanel extends JPanel {
         }
     }
 
+    /**
+     * Edytuje dane zaznaczonego studenta.
+     * Pokazuje formularz z aktualnymi danymi i zapisuje zmiany.
+     */
     private void editStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -126,11 +160,7 @@ public class StudentPanel extends JPanel {
         for (Group g : groupDB.getAllGroups()) {
             groupComboBox.addItem(g.getGroupCode());
         }
-        if (student.getGroup() != null) {
-            groupComboBox.setSelectedItem(student.getGroup().getGroupCode());
-        } else {
-            groupComboBox.setSelectedItem("Brak");
-        }
+        groupComboBox.setSelectedItem(student.getGroup() != null ? student.getGroup().getGroupCode() : "Brak");
 
         JPanel panel = new JPanel(new GridLayout(4, 2));
         panel.add(new JLabel("Imię:"));
@@ -172,6 +202,10 @@ public class StudentPanel extends JPanel {
         }
     }
 
+    /**
+     * Usuwa zaznaczonego studenta z bazy danych i z tabeli.
+     * Pokazuje komunikat o powodzeniu.
+     */
     private void deleteStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -189,6 +223,9 @@ public class StudentPanel extends JPanel {
         }
     }
 
+    /**
+     * Wyświetla okno dialogowe z wynikami studenta zaznaczonego w tabeli.
+     */
     private void showScoresForSelectedStudent() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -212,6 +249,9 @@ public class StudentPanel extends JPanel {
         dialog.setVisible(true);
     }
 
+    /**
+     * Odświeża tabelę studentów, wczytując dane z bazy {@link StudentDB}.
+     */
     public void refreshStudentTable() {
         studentTableModel.setRowCount(0);
         for (Student s : studentDB.getStudents()) {

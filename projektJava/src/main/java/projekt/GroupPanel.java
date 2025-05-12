@@ -3,140 +3,175 @@ package projekt;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.*;
-import java.util.List;
 
 /**
- * Klasa reprezentująca panel do zarządzania grupami. Pozwala dodawać, edytować,
- * usuwać oraz importować/eksportować grupy.
+ * Panel Swing do zarządzania grupami. Umożliwia dodawanie, edytowanie, usuwanie
+ * grup oraz powrót do menu głównego aplikacji.
+ * <p>
+ * Dane grup są pobierane z {@link GroupDB} i prezentowane w tabeli.
+ * </p>
+ * 
+ * @author
+ *     Wiśniewski Mateusz
  */
 public class GroupPanel extends JPanel {
 
-	private MyWindow parentWindow;
-	private GroupDB groupDB;
-	private DefaultTableModel groupTableModel;
-	private JTable groupTable;
+    /** Główne okno aplikacji, umożliwia nawigację do menu */
+    private MyWindow parentWindow;
 
-	public GroupPanel(MyWindow parentWindow, GroupDB groupDB) {
-		this.parentWindow = parentWindow;
-		this.groupDB = groupDB;
+    /** Baza danych grup */
+    private GroupDB groupDB;
 
-		setLayout(new BorderLayout());
+    /** Model tabeli grup */
+    private DefaultTableModel groupTableModel;
 
-		groupTableModel = new DefaultTableModel(new String[] { "Kod grupy", "Specjalizacja", "Opis" }, 0);
-		groupTable = new JTable(groupTableModel);
-		JScrollPane scrollPane = new JScrollPane(groupTable);
-		add(scrollPane, BorderLayout.CENTER);
+    /** Tabela wyświetlająca listę grup */
+    private JTable groupTable;
 
-		JPanel buttonPanel = new JPanel();
-		JButton addButton = new JButton("Dodaj Grupę");
-		JButton editButton = new JButton("Edytuj Grupę");
-		JButton deleteButton = new JButton("Usuń Grupę");
-	
-		JButton backButton = new JButton("Wróć");
+    /**
+     * Tworzy panel do zarządzania grupami.
+     *
+     * @param parentWindow główne okno aplikacji
+     * @param groupDB      baza danych grup
+     */
+    public GroupPanel(MyWindow parentWindow, GroupDB groupDB) {
+        this.parentWindow = parentWindow;
+        this.groupDB = groupDB;
 
-		buttonPanel.add(addButton);
-		buttonPanel.add(editButton);
-		buttonPanel.add(deleteButton);
-	
-		buttonPanel.add(backButton);
+        setLayout(new BorderLayout());
 
-		add(buttonPanel, BorderLayout.SOUTH);
+        groupTableModel = new DefaultTableModel(new String[] { "Kod grupy", "Specjalizacja", "Opis" }, 0);
+        groupTable = new JTable(groupTableModel);
+        JScrollPane scrollPane = new JScrollPane(groupTable);
+        add(scrollPane, BorderLayout.CENTER);
 
-		addButton.addActionListener(e -> addGroup());
-		editButton.addActionListener(e -> editGroup());
-		deleteButton.addActionListener(e -> deleteGroup());
-		
-		backButton.addActionListener(e -> parentWindow.showMenu());
+        JPanel buttonPanel = new JPanel();
+        JButton addButton = new JButton("Dodaj Grupę");
+        JButton editButton = new JButton("Edytuj Grupę");
+        JButton deleteButton = new JButton("Usuń Grupę");
+        JButton backButton = new JButton("Wróć");
 
-		refreshTable();
-	}
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(backButton);
 
-	private void addGroup() {
-		JTextField codeField = new JTextField();
-		JTextField specializationField = new JTextField();
-		JTextField descriptionField = new JTextField();
+        add(buttonPanel, BorderLayout.SOUTH);
 
-		Object[] inputs = { "Kod grupy:", codeField, "Specjalizacja:", specializationField, "Opis:", descriptionField };
+        addButton.addActionListener(e -> addGroup());
+        editButton.addActionListener(e -> editGroup());
+        deleteButton.addActionListener(e -> deleteGroup());
+        backButton.addActionListener(e -> parentWindow.showMenu());
 
-		int result = JOptionPane.showConfirmDialog(this, inputs, "Dodaj Grupę", JOptionPane.OK_CANCEL_OPTION);
-		if (result == JOptionPane.OK_OPTION) {
-			String code = codeField.getText().trim();
-			String spec = specializationField.getText().trim();
-			String desc = descriptionField.getText().trim();
+        refreshTable();
+    }
 
-			if (code.isEmpty() || spec.isEmpty() || desc.isEmpty()) {
-				JOptionPane.showMessageDialog(this, "Wszystkie pola muszą być wypełnione!", "Błąd",
-						JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+    /**
+     * Wyświetla formularz do dodania nowej grupy i dodaje ją do bazy danych.
+     * Pokazuje komunikat błędu, jeśli pola są puste.
+     */
+    private void addGroup() {
+        JTextField codeField = new JTextField();
+        JTextField specializationField = new JTextField();
+        JTextField descriptionField = new JTextField();
 
-			Group group = new Group(code, spec, desc);
-			groupDB.addGroup(group);
-			refreshTable();
-		}
-	}
+        Object[] inputs = {
+                "Kod grupy:", codeField,
+                "Specjalizacja:", specializationField,
+                "Opis:", descriptionField
+        };
 
-	private void editGroup() {
-		int selectedRow = groupTable.getSelectedRow();
-		if (selectedRow == -1) {
-			JOptionPane.showMessageDialog(this, "Wybierz grupę do edycji!", "Błąd", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+        int result = JOptionPane.showConfirmDialog(this, inputs, "Dodaj Grupę", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            String code = codeField.getText().trim();
+            String spec = specializationField.getText().trim();
+            String desc = descriptionField.getText().trim();
 
-		String currentCode = groupTableModel.getValueAt(selectedRow, 0).toString();
-		String currentSpec = groupTableModel.getValueAt(selectedRow, 1).toString();
-		String currentDesc = groupTableModel.getValueAt(selectedRow, 2).toString();
+            if (code.isEmpty() || spec.isEmpty() || desc.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Wszystkie pola muszą być wypełnione!", "Błąd", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-		JTextField codeField = new JTextField(currentCode);
-		JTextField specField = new JTextField(currentSpec);
-		JTextField descField = new JTextField(currentDesc);
+            Group group = new Group(code, spec, desc);
+            groupDB.addGroup(group);
+            refreshTable();
+        }
+    }
 
-		Object[] inputs = { "Kod grupy:", codeField, "Specjalizacja:", specField, "Opis:", descField };
+    /**
+     * Edytuje dane aktualnie zaznaczonej grupy w tabeli.
+     * Pokazuje formularz z możliwością aktualizacji danych.
+     */
+    private void editGroup() {
+        int selectedRow = groupTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Wybierz grupę do edycji!", "Błąd", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-		int result = JOptionPane.showConfirmDialog(this, inputs, "Edytuj Grupę", JOptionPane.OK_CANCEL_OPTION);
-		if (result == JOptionPane.OK_OPTION) {
-			String code = codeField.getText().trim();
-			String spec = specField.getText().trim();
-			String desc = descField.getText().trim();
+        String currentCode = groupTableModel.getValueAt(selectedRow, 0).toString();
+        String currentSpec = groupTableModel.getValueAt(selectedRow, 1).toString();
+        String currentDesc = groupTableModel.getValueAt(selectedRow, 2).toString();
 
-			if (code.isEmpty() || spec.isEmpty() || desc.isEmpty()) {
-				JOptionPane.showMessageDialog(this, "Wszystkie pola muszą być wypełnione!", "Błąd",
-						JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+        JTextField codeField = new JTextField(currentCode);
+        JTextField specField = new JTextField(currentSpec);
+        JTextField descField = new JTextField(currentDesc);
 
-			Group group = groupDB.getGroupByCode(currentCode);
-			if (group != null) {
-				group.setGroupCode(code);
-				group.setSpecialization(spec);
-				group.setDescription(desc);
-				refreshTable();
-			}
-		}
-	}
+        Object[] inputs = {
+                "Kod grupy:", codeField,
+                "Specjalizacja:", specField,
+                "Opis:", descField
+        };
 
-	private void deleteGroup() {
-		int selectedRow = groupTable.getSelectedRow();
-		if (selectedRow == -1) {
-			JOptionPane.showMessageDialog(this, "Wybierz grupę do usunięcia!", "Błąd", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+        int result = JOptionPane.showConfirmDialog(this, inputs, "Edytuj Grupę", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            String code = codeField.getText().trim();
+            String spec = specField.getText().trim();
+            String desc = descField.getText().trim();
 
-		String code = groupTableModel.getValueAt(selectedRow, 0).toString();
-		if (groupDB.deleteGroup(code)) {
-			refreshTable();
-		}
-	}
+            if (code.isEmpty() || spec.isEmpty() || desc.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Wszystkie pola muszą być wypełnione!", "Błąd", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-	public void refreshTable() {
-		groupTableModel.setRowCount(0);
-		for (Group g : groupDB.getAllGroups()) {
-			groupTableModel.addRow(new Object[] { g.getGroupCode(), g.getSpecialization(), g.getDescription() });
-		}
-	}
+            Group group = groupDB.getGroupByCode(currentCode);
+            if (group != null) {
+                group.setGroupCode(code);
+                group.setSpecialization(spec);
+                group.setDescription(desc);
+                refreshTable();
+            }
+        }
+    }
 
-	
+    /**
+     * Usuwa zaznaczoną grupę z bazy danych po potwierdzeniu.
+     * Pokazuje komunikat błędu, jeśli żadna grupa nie jest zaznaczona.
+     */
+    private void deleteGroup() {
+        int selectedRow = groupTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Wybierz grupę do usunięcia!", "Błąd", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-	
+        String code = groupTableModel.getValueAt(selectedRow, 0).toString();
+        if (groupDB.deleteGroup(code)) {
+            refreshTable();
+        }
+    }
+
+    /**
+     * Odświeża tabelę grup, ładując aktualne dane z {@link GroupDB}.
+     */
+    public void refreshTable() {
+        groupTableModel.setRowCount(0);
+        for (Group g : groupDB.getAllGroups()) {
+            groupTableModel.addRow(new Object[] {
+                    g.getGroupCode(),
+                    g.getSpecialization(),
+                    g.getDescription()
+            });
+        }
+    }
 }
