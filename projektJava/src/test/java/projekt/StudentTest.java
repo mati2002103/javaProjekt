@@ -17,6 +17,8 @@ class StudentTest {
         group = new Group("G01", "Informatyka", "Grupa Informatyki");
         student = new Student("Jan", "Kowalski", "12345", group);
         subject = new Subject("Matematyka");  // Zakładając, że klasa Subject ma konstruktor przyjmujący nazwę przedmiotu
+        
+        subject.getGradingCriteria().put("Zaliczenie", 100);
     }
 
     // Test sprawdzający poprawne tworzenie obiektu Student

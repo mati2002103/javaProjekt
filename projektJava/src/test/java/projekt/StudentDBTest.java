@@ -6,21 +6,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 
 class StudentDBTest {
 
     private StudentDB studentDB;
     private Group group;
     private Subject subject;
+    private SubjectDB subjectDB;
+    private GroupDB groupDB;
 
     @BeforeEach
     void setUp() {
         studentDB = new StudentDB();
         group = new Group("G1", "Informatyka", "Grupa testowa");
+
         subject = new Subject("Programowanie");
-        subject.getGradingCriteria().put("Zaliczenie", 100);
+        subject.getGradingCriteria().put("Zaliczenie", 100); // ustawienie kryterium
+
+        subjectDB = new SubjectDB();
+        subjectDB.addSubject(subject); // dodanie przedmiotu do bazy
+
+        groupDB = new GroupDB();
+        groupDB.addGroup(group); // dodanie grupy do bazy
     }
 
     @Test
@@ -63,29 +70,24 @@ class StudentDBTest {
 
     @Test
     void testSaveAndLoadFromFile() throws Exception {
-        // Przygotuj dane
+        // Przygotowanie studenta i przypisanie punktów z użyciem poprawnej instancji przedmiotu
         Student student = new Student("Paweł", "Kowal", "001", group);
         student.addPoints(subject, "Zaliczenie", 90);
         studentDB.addStudentToStudentList(student);
 
-        // Serializacja do strumienia w pamięci
+        // Serializacja do pamięci
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
         studentDB.saveToFile(out);
 
-        // Deserializacja z tego samego strumienia
+        // Deserializacja z pamięci
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         DataInputStream in = new DataInputStream(bais);
 
         StudentDB loadedDB = new StudentDB();
-        GroupDB groupDB = new GroupDB();
-        groupDB.addGroup(group);
-
-        SubjectDB subjectDB = new SubjectDB();
-        subjectDB.addSubject(subject);
-
         loadedDB.loadFromFile(in, groupDB, subjectDB);
 
+        // Walidacja
         assertEquals(1, loadedDB.getStudents().size());
         Student loadedStudent = loadedDB.getStudentByAlbumNumber("001");
         assertNotNull(loadedStudent);
