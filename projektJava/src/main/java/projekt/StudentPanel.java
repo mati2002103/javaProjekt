@@ -22,7 +22,14 @@ public class StudentPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        studentTableModel = new DefaultTableModel(new String[]{"Imię", "Nazwisko", "Numer Albumu", "Grupa"}, 0);
+        studentTableModel = new DefaultTableModel(new String[]{"Imię", "Nazwisko", "Numer Albumu", "Grupa"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column != 2;
+            }
+        };
+
+        studentTable = new JTable(studentTableModel);
         studentTable = new JTable(studentTableModel);
         JScrollPane scrollPane = new JScrollPane(studentTable);
         add(scrollPane, BorderLayout.CENTER);

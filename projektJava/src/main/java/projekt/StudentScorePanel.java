@@ -1,6 +1,7 @@
 package projekt;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.*;
@@ -13,96 +14,41 @@ import java.util.List;
  */
 public class StudentScorePanel extends JPanel {
 
-    private DefaultTableModel scoreTableModel;
+    private Student student;
+    private List<Subject> subjects;
+    private JTabbedPane tabbedPane;
 
     public StudentScorePanel(Student student, List<Subject> subjects) {
+        this.student = student;
+        this.subjects = subjects;
+        initializeUI();
+    }
+
+    private void initializeUI() {
         setLayout(new BorderLayout());
 
-        JLabel headerLabel = new JLabel("Wyniki studenta: " + student.getName() + " " + student.getSurname(), SwingConstants.CENTER);
+        // Nagłówek z nazwą studenta
+        JLabel headerLabel = new JLabel("Wyniki studenta: " + student.getName() + " " + student.getSurname(), 
+                                      SwingConstants.CENTER);
         headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
         add(headerLabel, BorderLayout.NORTH);
 
-        // Zbieranie wszystkich możliwych kryteriów ze wszystkich przedmiotów
-        Set<String> allCriteria = new TreeSet<>();
+        // Panel z kartami dla każdego przedmiotu
+        tabbedPane = new JTabbedPane();
+        add(tabbedPane, BorderLayout.CENTER);
+
+        // Tworzenie panelu dla każdego przedmiotu
         for (Subject subject : subjects) {
-            allCriteria.addAll(subject.getGradingCriteria().keySet());
+            JPanel subjectPanel = createSubjectPanel(subject);
+            tabbedPane.addTab(subject.getSubjectName(), subjectPanel);
         }
 
-        // Tworzenie nagłówków kolumn: Przedmiot | Kryteria... | Suma
-        String[] columnNames = new String[allCriteria.size() + 2];
-        columnNames[0] = "Przedmiot";
-        int colIndex = 1;
-        for (String criteriaName : allCriteria) {
-            columnNames[colIndex++] = criteriaName;
-        }
-        columnNames[colIndex] = "Suma";
-
-        // Konfiguracja modelu tabeli
-        scoreTableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column != 0 && column != getColumnCount() - 1;
-            }
-        };
-
-        // Uzupełnienie danych tabeli z ocenami studenta
-        for (Subject subject : subjects) {
-            Map<String, Integer> grades = student.getGrades().getOrDefault(subject, new HashMap<>());
-            Object[] row = new Object[columnNames.length];
-            row[0] = subject.getSubjectName();
-            int sum = 0;
-
-            for (int i = 1; i < columnNames.length - 1; i++) {
-                int points = grades.getOrDefault(columnNames[i], 0);
-                row[i] = points;
-                sum += points;
-            }
-
-            row[columnNames.length - 1] = sum;
-            scoreTableModel.addRow(row);
-        }
-
-        JTable scoreTable = new JTable(scoreTableModel);
-        scoreTable.setRowHeight(25);
-        scoreTable.setFillsViewportHeight(true);
-        JScrollPane scrollPane = new JScrollPane(scoreTable);
-        scrollPane.setPreferredSize(new Dimension(800, 400));
-        add(scrollPane, BorderLayout.CENTER);
-
-        // Panel z przyciskami
+        // Panel przycisków
         JPanel buttonPanel = new JPanel();
         JButton saveButton = new JButton("Zapisz");
         JButton closeButton = new JButton("Zamknij");
 
-        // Obsługa przycisku Zapisz
-        saveButton.addActionListener(e -> {
-            for (int row = 0; row < scoreTableModel.getRowCount(); row++) {
-                String subjectName = scoreTableModel.getValueAt(row, 0).toString();
-
-                Subject subject = subjects.stream()
-                        .filter(s -> s.getSubjectName().equals(subjectName))
-                        .findFirst()
-                        .orElse(null);
-
-                if (subject == null) continue;
-
-                Map<String, Integer> newGrades = new HashMap<>();
-                int total = 0;
-
-                for (int col = 1; col < scoreTableModel.getColumnCount() - 1; col++) {
-                    String criteriaName = scoreTableModel.getColumnName(col);
-                    int value = parseCellValue(row, col);
-                    newGrades.put(criteriaName, value);
-                    total += value;
-                }
-
-                student.getGrades().put(subject, newGrades);
-                scoreTableModel.setValueAt(total, row, scoreTableModel.getColumnCount() - 1);
-            }
-
-            JOptionPane.showMessageDialog(this, "Wyniki zostały zapisane pomyślnie!", "Sukces", JOptionPane.INFORMATION_MESSAGE);
-        });
-
+        saveButton.addActionListener(e -> saveAllChanges());
         closeButton.addActionListener(e -> SwingUtilities.getWindowAncestor(this).dispose());
 
         buttonPanel.add(saveButton);
@@ -110,15 +56,118 @@ public class StudentScorePanel extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // Pomocnicza metoda do parsowania wartości komórki
-    private int parseCellValue(int row, int col) {
-        Object value = scoreTableModel.getValueAt(row, col);
-        if (value == null || value.toString().trim().isEmpty()) return 0;
+    private JPanel createSubjectPanel(Subject subject) {
+        JPanel panel = new JPanel(new BorderLayout());
+        
+        // Pobierz kryteria dla przedmiotu
+        Map<String, Integer> criteria = subject.getGradingCriteria();
+        
+        // Nagłówki kolumn: Kryterium | Punkty | Max punktów
+        String[] columnNames = {"Kryterium", "Punkty", "Max punktów"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 1; // Tylko kolumna z punktami jest edytowalna
+            }
+        };
 
-        try {
-            return Integer.parseInt(value.toString().trim());
-        } catch (NumberFormatException e) {
-            return 0;
+        // Wypełnij tabelę danymi
+        Map<String, Integer> studentGrades = student.getGrades().getOrDefault(subject, new HashMap<>());
+        int totalPoints = 0;
+        int totalMaxPoints = 0;
+
+        for (Map.Entry<String, Integer> entry : criteria.entrySet()) {
+            String criteriaName = entry.getKey();
+            int maxPoints = entry.getValue();
+            int points = studentGrades.getOrDefault(criteriaName, 0);
+            
+            model.addRow(new Object[]{criteriaName, points, maxPoints});
+            
+            totalPoints += points;
+            totalMaxPoints += maxPoints;
         }
+
+        JTable table = new JTable(model);
+        table.setRowHeight(25);
+        
+        // Dodaj podsumowanie pod tabelą
+        JPanel summaryPanel = new JPanel(new GridLayout(1, 2));
+        summaryPanel.add(new JLabel("Suma punktów: " + totalPoints));
+        summaryPanel.add(new JLabel("Suma max punktów: " + totalMaxPoints));
+        
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(summaryPanel, BorderLayout.SOUTH);
+        
+        return panel;
+    }
+
+    private void saveAllChanges() {
+        List<String> errors = new ArrayList<>();
+        boolean hasErrors = false;
+
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            Component component = tabbedPane.getComponentAt(i);
+            if (component instanceof JPanel) {
+                JScrollPane scrollPane = (JScrollPane) ((JPanel) component).getComponent(0);
+                JTable table = (JTable) scrollPane.getViewport().getView();
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                
+                String subjectName = tabbedPane.getTitleAt(i);
+                Subject subject = findSubjectByName(subjectName);
+                if (subject == null) continue;
+                
+                Map<String, Integer> newGrades = new HashMap<>();
+                int totalPoints = 0;
+                int totalMaxPoints = 0;
+
+                for (int row = 0; row < model.getRowCount(); row++) {
+                    String criteriaName = (String) model.getValueAt(row, 0);
+                    int points;
+                    try {
+                        points = Integer.parseInt(model.getValueAt(row, 1).toString());
+                    } catch (NumberFormatException e) {
+                        points = 0;
+                    }
+                    int maxPoints = (Integer) model.getValueAt(row, 2);
+                    
+                    if (points < 0 || points > maxPoints) {
+                        errors.add(subjectName + ": " + criteriaName + " - nieprawidłowa wartość (0-" + maxPoints + ")");
+                        hasErrors = true;
+                    } else {
+                        newGrades.put(criteriaName, points);
+                        totalPoints += points;
+                        totalMaxPoints += maxPoints;
+                    }
+                }
+                
+                if (!hasErrors) {
+                    // Aktualizacja danych studenta
+                    student.getGrades().put(subject, newGrades);
+                    
+                    // Aktualizacja podsumowania
+                    JPanel summaryPanel = (JPanel) ((JPanel) component).getComponent(1);
+                    ((JLabel) summaryPanel.getComponent(0)).setText("Suma punktów: " + totalPoints);
+                    ((JLabel) summaryPanel.getComponent(1)).setText("Suma max punktów: " + totalMaxPoints);
+                }
+            }
+        }
+        
+        if (hasErrors) {
+            JOptionPane.showMessageDialog(this, 
+                "Wystąpiły błędy:\n" + String.join("\n", errors),
+                "Błędy w danych",
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Dane zostały poprawnie zapisane!",
+                "Sukces",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    private Subject findSubjectByName(String subjectName) {
+        return subjects.stream()
+            .filter(s -> s.getSubjectName().equals(subjectName))
+            .findFirst()
+            .orElse(null);
     }
 }

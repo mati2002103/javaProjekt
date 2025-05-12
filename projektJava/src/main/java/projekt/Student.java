@@ -92,7 +92,7 @@ public class Student {
      * @throws RegisterException jeśli punkty są spoza dozwolonego zakresu
      */
     public boolean addPoints(Subject subject, String criteriaName, int points) throws RegisterException {
-        if (points < 0 || subject.getGradingCriteria().get(criteriaName) == null) {
+        if (points < 0 || subject.getGradingCriteria().get(criteriaName) == null ||  points <= subject.getGradingCriteria().get(criteriaName)) {
             throw new RegisterException("Niepoprawna liczba punktów lub brak kryterium w przedmiocie");
         }
 
