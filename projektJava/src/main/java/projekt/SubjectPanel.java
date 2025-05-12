@@ -130,7 +130,7 @@ public class SubjectPanel extends JPanel {
         }
     }
 
-    private void refreshTable() {
+    public void refreshTable() {
         subjectTableModel.setRowCount(0);
         for (Subject subject : subjectDB.getAllSubjects()) {
             StringBuilder criteriaText = new StringBuilder();

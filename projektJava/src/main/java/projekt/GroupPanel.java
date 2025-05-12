@@ -32,15 +32,13 @@ public class GroupPanel extends JPanel {
 		JButton addButton = new JButton("Dodaj Grupę");
 		JButton editButton = new JButton("Edytuj Grupę");
 		JButton deleteButton = new JButton("Usuń Grupę");
-		JButton importButton = new JButton("Importuj");
-		JButton exportButton = new JButton("Eksportuj");
+	
 		JButton backButton = new JButton("Wróć");
 
 		buttonPanel.add(addButton);
 		buttonPanel.add(editButton);
 		buttonPanel.add(deleteButton);
-		buttonPanel.add(importButton);
-		buttonPanel.add(exportButton);
+	
 		buttonPanel.add(backButton);
 
 		add(buttonPanel, BorderLayout.SOUTH);
@@ -48,8 +46,7 @@ public class GroupPanel extends JPanel {
 		addButton.addActionListener(e -> addGroup());
 		editButton.addActionListener(e -> editGroup());
 		deleteButton.addActionListener(e -> deleteGroup());
-		importButton.addActionListener(e -> importGroups());
-		exportButton.addActionListener(e -> exportGroups());
+		
 		backButton.addActionListener(e -> parentWindow.showMenu());
 
 		refreshTable();
@@ -132,38 +129,14 @@ public class GroupPanel extends JPanel {
 		}
 	}
 
-	private void refreshTable() {
+	public void refreshTable() {
 		groupTableModel.setRowCount(0);
 		for (Group g : groupDB.getAllGroups()) {
 			groupTableModel.addRow(new Object[] { g.getGroupCode(), g.getSpecialization(), g.getDescription() });
 		}
 	}
 
-	private void importGroups() {
-		JFileChooser chooser = new JFileChooser();
-		int option = chooser.showOpenDialog(this);
-		if (option == JFileChooser.APPROVE_OPTION) {
-			try (DataInputStream in = new DataInputStream(new FileInputStream(chooser.getSelectedFile()))) {
-				groupDB.loadFromFile(in);
-				refreshTable();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Błąd podczas importu: " + e.getMessage(), "Błąd",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
+	
 
-	private void exportGroups() {
-		JFileChooser chooser = new JFileChooser();
-		int option = chooser.showSaveDialog(this);
-		if (option == JFileChooser.APPROVE_OPTION) {
-			try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chooser.getSelectedFile()))) {
-				groupDB.saveToFile(out);
-				JOptionPane.showMessageDialog(this, "Eksport zakończony sukcesem.");
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Błąd podczas eksportu: " + e.getMessage(), "Błąd",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
+	
 }
