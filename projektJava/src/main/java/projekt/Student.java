@@ -5,108 +5,109 @@ import java.util.Map;
 
 /**
  * 
- * @author Wiśniewski Mateusz
  * 
  * Klasa reprezentująca studenta wraz z jego danymi, przynależnością do grupy
  * oraz ocenami z przedmiotów według określonych kryteriów.
+ * 
+ * 
+ * 
+ * @author Wiśniewski Mateusz
  */
 public class Student {
 
 	private Map<String, int[]> subjectScores = new HashMap<>();
-	
-    /** Imię studenta */
-    private String name;
 
-    /** Nazwisko studenta */
-    private String surname;
+	/** Imię studenta */
+	private String name;
 
-    /** Numer albumu studenta */
-    private String albumNumber;
+	/** Nazwisko studenta */
+	private String surname;
 
-    /** Grupa, do której przypisany jest student */
-    private Group group;
+	/** Numer albumu studenta */
+	private String albumNumber;
 
-    /**
-     * Mapa ocen studenta.
-     * Kluczem jest przedmiot, a wartością mapa par (nazwa kryterium, punkty).
-     */
-    private Map<Subject, Map<String, Integer>> grades;
+	/** Grupa, do której przypisany jest student */
+	private Group group;
 
-    /**
-     * Konstruktor domyślny – inicjalizuje pustego studenta.
-     */
-    Student() {
-        this.name = null;
-        this.surname = null;
-        this.albumNumber = null;
-        this.grades = new HashMap<>();
-    }
+	/**
+	 * Mapa ocen studenta. Kluczem jest przedmiot, a wartością mapa par (nazwa
+	 * kryterium, punkty).
+	 */
+	private Map<Subject, Map<String, Integer>> grades;
 
-    /**
-     * Konstruktor tworzący studenta z podanymi danymi.
-     *
-     * @param name        imię studenta
-     * @param surname     nazwisko studenta
-     * @param albumNumber numer albumu studenta
-     * @param group       grupa przypisana studentowi
-     */
-    Student(String name, String surname, String albumNumber, Group group) {
-        this.name = name;
-        this.surname = surname;
-        this.albumNumber = albumNumber;
-        this.group = group;
-        this.grades = new HashMap<>();
-    }
+	/**
+	 * Konstruktor domyślny – inicjalizuje pustego studenta.
+	 */
+	Student() {
+		this.name = null;
+		this.surname = null;
+		this.albumNumber = null;
+		this.grades = new HashMap<>();
+	}
 
-    /**
-     * Tworzy nowego studenta na podstawie podanych danych.
-     *
-     * @param name        imię studenta
-     * @param surname     nazwisko studenta
-     * @param albumNumber numer albumu
-     * @param group       grupa
-     * @return nowy obiekt Student
-     */
-    public Student createStudent(String name, String surname, String albumNumber, Group group) {
-        Student newStudent = new Student(name, surname, albumNumber, group);
-        return newStudent;
-    }
+	/**
+	 * Konstruktor tworzący studenta z podanymi danymi.
+	 *
+	 * @param name        imię studenta
+	 * @param surname     nazwisko studenta
+	 * @param albumNumber numer albumu studenta
+	 * @param group       grupa przypisana studentowi
+	 */
+	Student(String name, String surname, String albumNumber, Group group) {
+		this.name = name;
+		this.surname = surname;
+		this.albumNumber = albumNumber;
+		this.group = group;
+		this.grades = new HashMap<>();
+	}
 
-    /**
-     * Zwraca informacje o studencie jako tekst.
-     * (Wersja robocza, do uzupełnienia.)
-     *
-     * @return reprezentacja tekstowa studenta
-     */
-    public String studentToString() {
-        return null;
-    }
+	/**
+	 * Tworzy nowego studenta na podstawie podanych danych.
+	 *
+	 * @param name        imię studenta
+	 * @param surname     nazwisko studenta
+	 * @param albumNumber numer albumu
+	 * @param group       grupa
+	 * @return nowy obiekt Student
+	 */
+	public Student createStudent(String name, String surname, String albumNumber, Group group) {
+		Student newStudent = new Student(name, surname, albumNumber, group);
+		return newStudent;
+	}
 
-    /**
-     * Dodaje punkty studentowi z określonego przedmiotu i kryterium.
-     *
-     * @param subject  przedmiot
-     * @param criteriaName nazwa kryterium
-     * @param points   liczba punktów
-     * @return true, jeśli dodano punkty
-     * @throws RegisterException jeśli punkty są spoza dozwolonego zakresu
-     */
-    public boolean addPoints(Subject subject, String criteriaName, int points) throws RegisterException {
-        Integer maxPoints = subject.getGradingCriteria().get(criteriaName);
-        if (points < 0 || maxPoints == null || points > maxPoints) {
-            throw new RegisterException("Niepoprawna liczba punktów lub brak kryterium w przedmiocie");
-        }
+	/**
+	 * Zwraca informacje o studencie jako tekst. (Wersja robocza, do uzupełnienia.)
+	 *
+	 * @return reprezentacja tekstowa studenta
+	 */
+	public String studentToString() {
+		return null;
+	}
 
-        Map<String, Integer> subjectGrades = grades.get(subject);
-        if (subjectGrades == null) {
-            subjectGrades = new HashMap<>();
-            grades.put(subject, subjectGrades);
-        }
+	/**
+	 * Dodaje punkty studentowi z określonego przedmiotu i kryterium.
+	 *
+	 * @param subject      przedmiot
+	 * @param criteriaName nazwa kryterium
+	 * @param points       liczba punktów
+	 * @return true, jeśli dodano punkty
+	 * @throws RegisterException jeśli punkty są spoza dozwolonego zakresu
+	 */
+	public boolean addPoints(Subject subject, String criteriaName, int points) throws RegisterException {
+		Integer maxPoints = subject.getGradingCriteria().get(criteriaName);
+		if (points < 0 || maxPoints == null || points > maxPoints) {
+			throw new RegisterException("Niepoprawna liczba punktów lub brak kryterium w przedmiocie");
+		}
 
-        subjectGrades.put(criteriaName, points);
-        return true;
-    }
+		Map<String, Integer> subjectGrades = grades.get(subject);
+		if (subjectGrades == null) {
+			subjectGrades = new HashMap<>();
+			grades.put(subject, subjectGrades);
+		}
 
+		subjectGrades.put(criteriaName, points);
+		return true;
+	}
 
 	/////////////////////////
 	/// Getters and Setters
@@ -150,8 +151,8 @@ public class Student {
 	public void setGrades(Map<Subject, Map<String, Integer>> grades) {
 		this.grades = grades;
 	}
-	
+
 	public Map<String, int[]> getSubjectScores() {
-	    return subjectScores;
+		return subjectScores;
 	}
 }

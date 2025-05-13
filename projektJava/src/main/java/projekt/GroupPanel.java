@@ -11,8 +11,8 @@ import java.awt.*;
  * Dane grup są pobierane z {@link GroupDB} i prezentowane w tabeli.
  * </p>
  * 
- * @author
- *     Wiśniewski Mateusz
+ * @author Natalia Rzeszótko
+ *    
  */
 public class GroupPanel extends JPanel {
 

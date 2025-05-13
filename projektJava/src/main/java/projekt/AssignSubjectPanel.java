@@ -8,7 +8,10 @@ import java.util.List;
 /**
  * Klasa pozwalająca na przypisanie przedmiotu do wybranego studenta
  * oraz wpisanie liczby punktów uzyskanych przez studenta.
+ * 
+ * @author Natalia Rzeszótko
  */
+
 public class AssignSubjectPanel extends JPanel {
 
     public AssignSubjectPanel(Student student, SubjectDB subjectDB) {

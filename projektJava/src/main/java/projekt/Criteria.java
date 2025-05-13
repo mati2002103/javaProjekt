@@ -7,6 +7,8 @@ import java.util.Objects;
 /**
  * Klasa reprezentująca kryterium oceniania dla przedmiotu,
  * zawierająca nazwę kryterium oraz maksymalną możliwą liczbę punktów.
+ * 
+ * @author Okoniecki Rafał
  */
 public class Criteria {
 
