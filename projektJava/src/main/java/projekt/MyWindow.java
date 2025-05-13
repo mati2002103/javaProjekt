@@ -1,5 +1,8 @@
 package projekt;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -7,13 +10,14 @@ import java.awt.event.WindowEvent;
 import java.io.*;
 
 /**
- * Główne okno aplikacji GUI służącej do zarządzania studentami, grupami i przedmiotami.
+ * Główne okno aplikacji GUI służącej do zarządzania studentami, grupami i
+ * przedmiotami.
  * <p>
- * Klasa odpowiada za nawigację między panelami oraz import/eksport danych.
+ * Klasa odpowiada za nawigację między panelami oraz import i eksport danych
+ * aplikacji.
  * </p>
  * 
- * @author
- *     Wiśniewski Mateusz
+ * @author Natala Rzeszótko
  */
 public class MyWindow extends JFrame {
 
@@ -44,9 +48,12 @@ public class MyWindow extends JFrame {
     /** Baza danych grup */
     private final GroupDB groupDB;
 
+    /** Wspólna pula wątków dla aplikacji */
+    private final ExecutorService threadPool;
+
     /**
      * Konstruktor tworzący okno główne aplikacji.
-     * Inicjalizuje wszystkie panele i bazy danych.
+     * Inicjalizuje wszystkie panele, bazy danych i konfiguracje GUI.
      */
     public MyWindow() {
         super("Aplikacja do zarządzania studentami, grupami i przedmiotami");
@@ -64,10 +71,13 @@ public class MyWindow extends JFrame {
 
         add(mainPanel);
         setVisible(true);
+
+        threadPool = Executors.newFixedThreadPool(AppConfig.THREAD_POOL_SIZE);
     }
 
     /**
-     * Inicjalizuje podstawowe właściwości okna (rozmiar, lokalizacja, akcja przy zamknięciu).
+     * Inicjalizuje podstawowe właściwości okna:
+     * rozmiar, lokalizację oraz obsługę zdarzenia zamknięcia.
      */
     private void initializeWindow() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -82,7 +92,8 @@ public class MyWindow extends JFrame {
     }
 
     /**
-     * Tworzy panel menu głównego z przyciskami nawigacyjnymi i przyciskami import/eksport.
+     * Tworzy panel menu głównego z przyciskami nawigacyjnymi
+     * oraz przyciskami importu, eksportu i wyjścia.
      */
     private void setupMenuPanel() {
         JPanel menuPanel = new JPanel(new BorderLayout());
@@ -157,43 +168,51 @@ public class MyWindow extends JFrame {
 
     /**
      * Importuje dane studentów, grup i przedmiotów z pliku binarnego.
-     * Pokazuje komunikaty o sukcesie lub błędzie.
+     * Wyświetla komunikaty o sukcesie lub błędzie.
      */
     private void importAllData() {
         JFileChooser chooser = new JFileChooser();
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try (DataInputStream in = new DataInputStream(new FileInputStream(chooser.getSelectedFile()))) {
-                groupDB.loadFromFile(in);
-                subjectDB.loadFromFile(in);
-                studentDB.loadFromFile(in, groupDB, subjectDB);
+            threadPool.submit(() -> {
+                try (DataInputStream in = new DataInputStream(new FileInputStream(chooser.getSelectedFile()))) {
+                    groupDB.loadFromFile(in);
+                    subjectDB.loadFromFile(in);
+                    studentDB.loadFromFile(in, groupDB, subjectDB);
 
-                JOptionPane.showMessageDialog(this, "Dane zaimportowane pomyślnie!");
-                refreshAllPanels();
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "Dane zaimportowane pomyślnie!");
+                        refreshAllPanels();
+                    });
 
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Błąd importu: " + e.getMessage(), "Błąd",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+                } catch (IOException e) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this,
+                            "Błąd importu: " + e.getMessage(), "Błąd", JOptionPane.ERROR_MESSAGE));
+                }
+            });
         }
     }
 
     /**
      * Eksportuje dane studentów, grup i przedmiotów do pliku binarnego.
-     * Pokazuje komunikaty o sukcesie lub błędzie.
+     * Wyświetla komunikaty o sukcesie lub błędzie.
      */
     private void exportAllData() {
         JFileChooser chooser = new JFileChooser();
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chooser.getSelectedFile()))) {
-                groupDB.saveToFile(out);
-                subjectDB.saveToFile(out);
-                studentDB.saveToFile(out);
+            threadPool.submit(() -> {
+                try (DataOutputStream out = new DataOutputStream(new FileOutputStream(chooser.getSelectedFile()))) {
+                    groupDB.saveToFile(out);
+                    subjectDB.saveToFile(out);
+                    studentDB.saveToFile(out);
 
-                JOptionPane.showMessageDialog(this, "Dane wyeksportowane pomyślnie!");
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Błąd eksportu: " + e.getMessage(), "Błąd",
-                        JOptionPane.ERROR_MESSAGE);
-            }
+                    SwingUtilities.invokeLater(() ->
+                            JOptionPane.showMessageDialog(this, "Dane wyeksportowane pomyślnie!"));
+
+                } catch (IOException e) {
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this,
+                            "Błąd eksportu: " + e.getMessage(), "Błąd", JOptionPane.ERROR_MESSAGE));
+                }
+            });
         }
     }
 
@@ -211,10 +230,12 @@ public class MyWindow extends JFrame {
      * Jeśli użytkownik zatwierdzi, program zostaje zakończony.
      */
     private void confirmExit() {
-        int option = JOptionPane.showConfirmDialog(this, "Czy na pewno chcesz zamknąć aplikację?",
+        int option = JOptionPane.showConfirmDialog(this,
+                "Czy na pewno chcesz zamknąć aplikację?",
                 "Potwierdzenie wyjścia", JOptionPane.YES_NO_OPTION);
 
         if (option == JOptionPane.YES_OPTION) {
+            threadPool.shutdownNow();
             dispose();
             System.exit(0);
         }

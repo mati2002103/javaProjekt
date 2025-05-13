@@ -1,11 +1,12 @@
 package projekt;
 
 /**
- * @author Wiśniewski Mateusz
  * 
- *         Klasa wyjątku, który jest rzucany w przypadku błędów związanych z
- *         rejestracją studenta lub grupy oraz operacjami związanymi z ocenami i
- *         punktami.
+ * 
+ * Klasa wyjątku, który jest rzucany w przypadku błędów związanych z rejestracją
+ * studenta lub grupy oraz operacjami związanymi z ocenami i punktami.
+ * 
+ * @author Wiśniewski Mateusz
  */
 public class RegisterException extends Exception {
 

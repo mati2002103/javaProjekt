@@ -6,6 +6,8 @@ import java.util.Map;
 /**
  * Klasa reprezentująca przedmiot akademicki, zawierająca jego nazwę
  * oraz dynamiczne kryteria oceniania wraz z maksymalnymi punktami.
+ * 
+ * @author Mateusz Wiśniewski
  */
 public class Subject {
 

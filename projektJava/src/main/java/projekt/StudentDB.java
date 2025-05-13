@@ -10,6 +10,9 @@ import java.util.Set;
 
 /**
  * Klasa odpowiedzialna za zarządzanie bazą danych studentów.
+ * 
+ * @author Wiśniewski Mateusz, Rafał Okoniecki
+ * 
  */
 public class StudentDB {
 

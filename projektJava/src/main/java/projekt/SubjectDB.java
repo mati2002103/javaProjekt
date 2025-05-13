@@ -10,6 +10,9 @@ import java.util.Map;
 
 /**
  * Klasa odpowiedzialna za zarządzanie bazą przedmiotów.
+ * 
+ * @author Okoniecki Rafał
+ * 
  */
 public class SubjectDB {
 	private Map<String, Integer> gradingCriteria;
